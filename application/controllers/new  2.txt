@@ -1,0 +1,63 @@
+	public function index() {
+		$key = 'zHsogYskkLB3SZd6d1IzmKH7U';
+		$secret_key = '2wvGz0UdTDIVZqPhaP7j8PF65gLWN5kYCqboNomq9HYJTxQPxb';
+		$token = '1411914864-KyTD8WgewNJXqV9348LViirYKugmGVhkx4F3bY4';
+		$secret_token = 'UQMqk9JmfK9lUVAddDoadtfNGsDan9Pyx7gBbhnA3Lbwu';
+
+		$screen_name = @$_GET['screen_name'];
+		$screen_name = !empty($screen_name) ? $screen_name  : null;
+
+		$response = array();
+		$status = !empty($screen_name) ? true : false;
+
+		$list_username = array(
+			'0'=>'- pilih akun -',
+			'kompascom'=>'Kompas.com',
+			'Yusuf_Mansur'=>'Yusuf Mansur',
+			'Detik'=>'Detik.com',
+			'Perawat'=>'Perawat'
+		);
+
+		$conn = new TwitterOAuth($key, $secret_key, $token, $secret_token);
+
+		if ($status == true) {
+			$response = $conn->get('statuses/user_timeline', array('count'=>10, 'screen_name'=>$screen_name));
+
+		}
+
+		$request = array(
+			'screen_name'=>$screen_name,
+			'list_username'=>$list_username,
+
+			'response'=>$response,
+			'status'=>$status
+		);
+		
+		// echo '<pre>';
+		// print_r($response);
+		// echo '</pre>';
+
+		if (count($response) > 0) {
+			foreach ($response as $row) {
+				$user_id = $row->user->id;
+				$user = $row->user->screen_name;
+				$tweet = $row->text;
+				$date = date('Y-m-d h:i:s', strtotime($row->created_at));
+				$link = isset($row->entities->urls[0]->url) ? $row->entities->urls[0]->url : null;
+			
+				// ehck data agar tidak duplicate
+				$model = $this->Twitter_model->checked($user_id, $date);
+				// if (count($model) == 0) {
+					// $datas = array(
+						// 'portal_berita'=>$user,
+						// 'date_tweet'=>$date,
+						// 'tweet_berita'=>$tweet,
+						// 'url_berita'=>$link
+					// );
+					// $this->Twitter_model->insert($datas);
+				// }
+			}
+		}
+
+		// $this->load->view('twitter/index', $request);
+	}
